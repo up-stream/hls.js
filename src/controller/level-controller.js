@@ -419,6 +419,11 @@ export default class LevelController extends EventHandler {
   }
 
   onAudioTrackSwitched (data) {
+    // for case when we are disabling (setting to track-id -1 on API)
+    if (data.id < 0) {
+      return;
+    }
+
     const audioGroupId = this.hls.audioTracks[data.id].groupId;
 
     const currentLevel = this.hls.levels[this.currentLevelIndex];
@@ -436,6 +441,11 @@ export default class LevelController extends EventHandler {
   }
 
   onSubtitleTrackSwitch (data) {
+    // for case when we are disabling (setting to track-id -1 on API)
+    if (data.id < 0) {
+      return;
+    }
+
     const subtitleGroupId = this.hls.subtitleTracks[data.id].groupId;
 
     const currentLevel = this.hls.levels[this.currentLevelIndex];
