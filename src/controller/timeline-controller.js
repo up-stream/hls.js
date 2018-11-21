@@ -92,11 +92,10 @@ class TimelineController extends EventHandler {
     // Due to asynchronous processing, initial PTS may arrive later than the first VTT fragments are loaded.
     // Parse any unparsed fragments upon receiving the initial PTS.
     if (this.unparsedVttFrags.length) {
-      const unparsedVttFrags = this.unparsedVttFrags;
-      this.unparsedVttFrags = [];
-      unparsedVttFrags.forEach(frag => {
+      this.unparsedVttFrags.forEach(frag => {
         this.onFragLoaded(frag);
       });
+      this.unparsedVttFrags = [];
     }
   }
 
@@ -217,13 +216,12 @@ class TimelineController extends EventHandler {
   }
 
   onFragLoaded (data) {
-    let frag = data.frag,
-      payload = data.payload;
+    const { cea608Parser, hls, initPTS } = this;
+    const { frag, payload } = data;
     if (frag.type === 'main') {
-      let sn = frag.sn;
+      const sn = frag.sn;
       // if this frag isn't contiguous, clear the parser so cues with bad start/end times aren't added to the textTrack
       if (sn !== this.lastSn + 1) {
-        const cea608Parser = this.cea608Parser;
         if (cea608Parser) {
           cea608Parser.reset();
         }
@@ -234,23 +232,23 @@ class TimelineController extends EventHandler {
     else if (frag.type === 'subtitle') {
       if (payload.byteLength) {
         // We need an initial synchronisation PTS. Store fragments as long as none has arrived.
-        if (!this.initPTS[frag.cc]) {
+        if (!Number.isFinite(initPTS[frag.cc])) {
           this.unparsedVttFrags.push(data);
-          if (this.initPTS.length) {
+          if (initPTS.length) {
             // finish unsuccessfully, otherwise the subtitle-stream-controller could be blocked from loading new frags.
             this.hls.trigger(Event.SUBTITLE_FRAG_PROCESSED, { success: false, frag: frag });
           }
           return;
         }
 
-        let decryptData = frag.decryptdata;
+        const decryptData = frag.decryptdata;
         // If the subtitles are not encrypted, parse VTTs now. Otherwise, we need to wait.
-        if ((decryptData == null) || (decryptData.key == null) || (decryptData.method !== 'AES-128')) {
+        if (!decryptData || !decryptData.key || decryptData.method !== 'AES-128') {
           this._parseVTTs(frag, payload);
         }
       } else {
         // In case there is no payload, finish unsuccessfully.
-        this.hls.trigger(Event.SUBTITLE_FRAG_PROCESSED, { success: false, frag: frag });
+        hls.trigger(Event.SUBTITLE_FRAG_PROCESSED, { success: false, frag: frag });
       }
     }
   }
@@ -300,11 +298,10 @@ class TimelineController extends EventHandler {
   }
 
   onFragDecrypted (data) {
-    let decryptedData = data.payload,
-      frag = data.frag;
+    const { decryptedData, frag } = data;
 
     if (frag.type === 'subtitle') {
-      if (!this.initPTS[frag.cc]) {
+      if (!Number.isFinite(this.initPTS[frag.cc])) {
         this.unparsedVttFrags.push(data);
         return;
       }

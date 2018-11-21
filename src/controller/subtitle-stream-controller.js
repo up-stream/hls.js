@@ -156,26 +156,27 @@ export class SubtitleStreamController extends TaskLoop {
   }
 
   onFragLoaded (data) {
-    const fragCurrent = this.fragCurrent;
+    const { fragCurrent, hls } = this;
     const decryptData = data.frag.decryptdata;
     const fragLoaded = data.frag;
-    const hls = this.hls;
 
     if (this.state === State.FRAG_LOADING &&
-        fragCurrent &&
         data.frag.type === 'subtitle' &&
+        fragCurrent &&
         fragCurrent.sn === data.frag.sn) {
       // check to see if the payload needs to be decrypted
-      if ((data.payload.byteLength > 0) &&
-          (decryptData != null) && (decryptData.key != null) &&
-          (decryptData.method === 'AES-128')) {
-        let startTime = performance.now();
-
+      if (data.payload.byteLength > 0 && (decryptData && decryptData.key && decryptData.method === 'AES-128')) {
         // decrypt the subtitles
-        this.decrypter.decrypt(data.payload, decryptData.key.buffer, decryptData.iv.buffer, function (decryptedData) {
-          let endTime = performance.now();
-
-          hls.trigger(Event.FRAG_DECRYPTED, { frag: fragLoaded, payload: decryptedData, stats: { tstart: startTime, tdecrypt: endTime } });
+        const startTime = performance.now();
+        this.decrypter.decrypt(data.payload, decryptData.key.buffer, decryptData.iv.buffer, decryptedData => {
+          hls.trigger(Event.FRAG_DECRYPTED, {
+            frag: fragLoaded,
+            payload: decryptedData,
+            stats: {
+              tstart: startTime,
+              tdecrypt: performance.now()
+            }
+          });
         });
       }
     }
@@ -188,56 +189,48 @@ export class SubtitleStreamController extends TaskLoop {
     }
 
     switch (this.state) {
-    case State.IDLE:
-      const tracks = this.tracks;
-      const trackId = this.currentTrackId;
+    case State.IDLE: {
+      const { config, currentTrackId: trackId, fragPrevious, hls, media, tracks } = this;
 
-      if (!tracks || trackId < 0 || trackId >= tracks.length || !tracks[trackId].details) {
+      if (!tracks || !tracks[trackId] || !tracks[trackId].details) {
         break;
       }
 
-      const trackDetails = tracks[trackId].details;
-
-      const config = this.config;
-      const maxBufferHole = config.maxBufferHole;
+      const { maxBufferHole, maxFragLookUpTolerance } = config;
       const maxConfigBuffer = Math.min(config.maxBufferLength, config.maxMaxBufferLength);
-      const maxFragLookUpTolerance = config.maxFragLookUpTolerance;
 
-      const bufferedInfo = BufferHelper.bufferedInfo(this._getBuffered(), this.media.currentTime, maxBufferHole);
-      const bufferEnd = bufferedInfo.end;
-      const bufferLen = bufferedInfo.len;
+      const bufferInfo = BufferHelper.bufferedInfo(this._getBuffered(), media.currentTime, maxBufferHole);
 
+      const trackDetails = tracks[trackId].details;
       const fragments = trackDetails.fragments;
-      const fragLen = fragments.length;
-      const end = fragments[fragLen - 1].start + fragments[fragLen - 1].duration;
+      const end = fragments[fragments.length - 1].start + fragments[fragments.length - 1].duration;
 
       let foundFrag;
-      if (bufferLen < maxConfigBuffer && bufferEnd < end) {
-        foundFrag = findFragmentByPTS(this.fragPrevious, fragments, bufferEnd, maxFragLookUpTolerance);
-      } else if (trackDetails.hasProgramDateTime && this.fragPrevious) {
-        foundFrag = findFragmentByPDT(fragments, this.fragPrevious.endProgramDateTime, maxFragLookUpTolerance);
+      if (bufferInfo.len < maxConfigBuffer && bufferInfo.end < end) {
+        foundFrag = findFragmentByPTS(fragPrevious, fragments, bufferInfo.end, maxFragLookUpTolerance);
+      } else if (trackDetails.hasProgramDateTime && fragPrevious) {
+        foundFrag = findFragmentByPDT(fragments, fragPrevious.endProgramDateTime, maxFragLookUpTolerance);
       }
 
-      if (foundFrag && foundFrag.encrypted) {
-        logger.log(`Loading key for ${foundFrag.sn}`);
-        this.state = State.KEY_LOADING;
-        this.hls.trigger(Event.KEY_LOADING, { frag: foundFrag });
-      } else if (foundFrag && this.fragmentTracker.getState(foundFrag) === FragmentState.NOT_LOADED) {
-        // only load if fragment is not loaded
-        foundFrag.trackId = trackId; // Frags don't know their subtitle track ID, so let's just add that...
-        this.fragCurrent = foundFrag;
-        this.state = State.FRAG_LOADING;
+      if (foundFrag) {
+        if (foundFrag.encrypted) {
+          logger.log(`Loading key for ${foundFrag.sn}`);
+          this.state = State.KEY_LOADING;
+          hls.trigger(Event.KEY_LOADING, { frag: foundFrag });
+        } else if (this.fragmentTracker.getState(foundFrag) === FragmentState.NOT_LOADED) {
+          // only load if fragment is not loaded
+          foundFrag.trackId = trackId; // Frags don't know their subtitle track ID, so let's just add that...
+          this.fragCurrent = foundFrag;
+          this.state = State.FRAG_LOADING;
 
-        this.hls.trigger(Event.FRAG_LOADING, { frag: foundFrag });
+          hls.trigger(Event.FRAG_LOADING, { frag: foundFrag });
+        }
       }
+    }
     }
   }
 
   _getBuffered () {
-    const buffered = this.tracksBuffered[this.currentTrackId];
-    if (buffered) {
-      return buffered;
-    }
-    return [];
+    return this.tracksBuffered[this.currentTrackId].buffered || [];
   }
 }
