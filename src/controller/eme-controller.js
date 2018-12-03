@@ -19,7 +19,8 @@ const MAX_LICENSE_REQUEST_FAILURES = 3;
  */
 const KeySystems = {
   WIDEVINE: 'com.widevine.alpha',
-  PLAYREADY: 'com.microsoft.playready'
+  PLAYREADY: 'com.microsoft.playready',
+  FAIRPLAY: 'com.apple.fps.3_0'
 };
 
 /**
@@ -92,6 +93,7 @@ class EMEController extends EventHandler {
     );
 
     this._widevineLicenseUrl = hls.config.widevineLicenseUrl;
+    this._fairplayLicenseUrl = hls.config.fairplayLicenseUrl;
     this._licenseXhrSetup = hls.config.licenseXhrSetup;
     this._emeEnabled = hls.config.emeEnabled;
 
@@ -116,6 +118,9 @@ class EMEController extends EventHandler {
     switch (keySystem) {
     case KeySystems.WIDEVINE:
       url = this._widevineLicenseUrl;
+      break;
+    case KeySystems.FAIRPLAY:
+      url = this._fairplayLicenseUrl;
       break;
     default:
       url = null;
@@ -143,6 +148,19 @@ class EMEController extends EventHandler {
      */
   _attemptKeySystemAccess (keySystem, audioCodecs, videoCodecs) {
     // TODO: add other DRM "options"
+
+    if (keySystem === KeySystems.FAIRPLAY) {
+      const mediaKeysListItem = {
+        mediaKeys: null,
+        mediaKeysSession: null,
+        mediaKeysSessionInitialized: false,
+        mediaKeySystemAccess: null,
+        mediaKeySystemDomain: keySystem
+      };
+      this._mediaKeysList.push(mediaKeysListItem);
+      mediaKeysListItem.mediaKeys = new window.WebKitMediaKeys(keySystem);
+      return;
+    }
 
     const mediaKeySystemConfigs = getSupportedMediaKeySystemConfigurations(keySystem, audioCodecs, videoCodecs);
 
@@ -227,6 +245,16 @@ class EMEController extends EventHandler {
     keySession.addEventListener('message', (event) => {
       this._onKeySessionMessage(keySession, event.message);
     }, false);
+    keySession.addEventListener('webkitkeymessage', (event) => {
+      this._onKeySessionMessage(keySession, event.message);
+    }, false);
+    keySession.addEventListener('webkitkeyadded', (e) => {
+      logger.log('webkitkeyadded');
+      this._media.play();
+    });
+    keySession.addEventListener('webkitkeyerror', (e) => {
+      logger.error('webkitkeyerror' + e.target);
+    });
   }
 
   _onKeySessionMessage (keySession, message) {
@@ -234,7 +262,11 @@ class EMEController extends EventHandler {
 
     this._requestLicense(message, (data) => {
       logger.log('Received license data, updating key-session');
-      keySession.update(data);
+      if (keySession.keySystem === KeySystems.FAIRPLAY) {
+        keySession.update(new Uint8Array(data));
+      } else {
+        keySession.update(data);
+      }
     });
   }
 
@@ -265,7 +297,11 @@ class EMEController extends EventHandler {
 
       logger.log('Setting keys for encrypted media');
 
-      this._media.setMediaKeys(keysListItem.mediaKeys);
+      if (this._media.webkitSetMediaKeys) {
+        this._media.webkitSetMediaKeys(keysListItem.mediaKeys);
+      } else {
+        this._media.setMediaKeys(keysListItem.mediaKeys);
+      }
       this._hasSetMediaKeys = true;
     }
   }
@@ -289,17 +325,23 @@ class EMEController extends EventHandler {
     }
 
     const keySession = keysListItem.mediaKeysSession;
-    if (!keySession) {
-      logger.error('Fatal: Media is encrypted but no key-session existing');
-      this.hls.trigger(Event.ERROR, {
-        type: ErrorTypes.KEY_SYSTEM_ERROR,
-        details: ErrorDetails.KEY_SYSTEM_NO_SESSION,
-        fatal: true
-      });
-    }
-
     const initDataType = this._mediaEncryptionInitDataType;
     const initData = this._mediaEncryptionInitData;
+    if (this._media.webkitKeys) {
+      keysListItem.mediaKeysSession = this._media.webkitKeys.createSession('video/mp4', initData);
+      keysListItem.mediaKeysSessionInitialized = true;
+      this._onNewMediaKeySession(keysListItem.mediaKeysSession);
+      return;
+    } else {
+      if (!keySession) {
+        logger.error('Fatal: Media is encrypted but no key-session existing');
+        this.hls.trigger(Event.ERROR, {
+          type: ErrorTypes.KEY_SYSTEM_ERROR,
+          details: ErrorDetails.KEY_SYSTEM_NO_SESSION,
+          fatal: true
+        });
+      }
+    }
 
     logger.log(`Generating key-session request for "${initDataType}" init data type`);
 
@@ -426,7 +468,7 @@ class EMEController extends EventHandler {
             }
         }
         */
-    } else if (keysListItem.mediaKeySystemDomain === KeySystems.WIDEVINE) {
+    } else if (keysListItem.mediaKeySystemDomain === KeySystems.WIDEVINE || keysListItem.mediaKeySystemDomain === KeySystems.FAIRPLAY) {
       // For Widevine CDMs, the challenge is the keyMessage.
       challenge = keyMessage;
     } else {
@@ -473,6 +515,9 @@ class EMEController extends EventHandler {
     media.addEventListener('encrypted', (e) => {
       this._onMediaEncrypted(e.initDataType, e.initData);
     });
+    media.addEventListener('webkitneedkey', (e) => {
+      this._onMediaEncrypted(e.initDataType, e.initData);
+    });
   }
 
   onManifestParsed (data) {
@@ -483,7 +528,11 @@ class EMEController extends EventHandler {
     const audioCodecs = data.levels.map((level) => level.audioCodec);
     const videoCodecs = data.levels.map((level) => level.videoCodec);
 
-    this._attemptKeySystemAccess(KeySystems.WIDEVINE, audioCodecs, videoCodecs);
+    if (window.WebKitMediaKeys) {
+      this._attemptKeySystemAccess(KeySystems.FAIRPLAY, audioCodecs, videoCodecs);
+    } else {
+      this._attemptKeySystemAccess(KeySystems.WIDEVINE, audioCodecs, videoCodecs);
+    }
   }
 }
 

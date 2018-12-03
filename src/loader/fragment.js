@@ -97,7 +97,7 @@ export default class Fragment {
   }
 
   get encrypted () {
-    return !!((this.decryptdata && this.decryptdata.uri !== null) && (this.decryptdata.key === null));
+    return !!((this.decryptdata && this.decryptdata.uri !== null) && (this.decryptdata.keyformat !== 'com.apple.streamingkeydelivery') && (this.decryptdata.key === null));
   }
 
   /**
@@ -142,6 +142,7 @@ export default class Fragment {
       decryptdata.method = levelkey.method;
       decryptdata.baseuri = levelkey.baseuri;
       decryptdata.reluri = levelkey.reluri;
+      decryptdata.keyformat = levelkey.keyformat;
       decryptdata.iv = this.createInitializationVector(segmentNumber);
     }
 

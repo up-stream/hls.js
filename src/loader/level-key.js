@@ -5,6 +5,7 @@ export default class LevelKey {
     this.method = null;
     this.key = null;
     this.iv = null;
+    this.keyformat = null;
     this._uri = null;
   }
 

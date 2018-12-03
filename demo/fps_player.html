@@ -1,0 +1,29 @@
+<style>
+    video {
+        width: 50%;
+        height: auto;
+    }
+</style>
+
+<h1>DRM (FPS)</h1>
+<p><button onclick="playDRM()">Play</button></p>
+<div id="timelogDRM"></div>
+<video controls id="videoDRM"></video>
+
+<script src="../dist/hls.js"></script>
+<script>
+var videoDRM = document.getElementById('videoDRM');
+var startTime, startNormalTime;
+var hlsDRM = new Hls({
+    liveSyncDurationCount: 10,
+    fairplayLicenseUrl: 'http://localhost:12345/fps/getLicense',
+    emeEnabled: true,
+    debug: true
+});
+
+function playDRM() {
+    hlsDRM.loadSource("/test1/master.m3u8");
+    hlsDRM.attachMedia(videoDRM);
+}
+
+</script>

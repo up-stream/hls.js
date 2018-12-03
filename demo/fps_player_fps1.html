@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<title>FPS Template</title>
+<script>
+    var drmURL = "/test1/master.m3u8";
+</script>
+<script src="./fpsplayer.js"></script>
+
+
+<style>
+    video {
+        width: 50%;
+        height: auto;
+    }
+</style>
+<h1>DRM (Fairplay)</h1>
+<p><button onclick="loadCertificate()">Play</button></p>
+<div id="timelogDRM"></div>
+<video controls muted id="videoDRM"></video>
+
+</html>

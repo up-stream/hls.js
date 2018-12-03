@@ -249,7 +249,8 @@ export default class M3U8Parser {
           var keyAttrs = new AttrList(decryptparams);
           var decryptmethod = keyAttrs.enumeratedString('METHOD'),
             decrypturi = keyAttrs.URI,
-            decryptiv = keyAttrs.hexadecimalInteger('IV');
+            decryptiv = keyAttrs.hexadecimalInteger('IV'),
+            keyformat = keyAttrs.enumeratedString('KEYFORMAT');
           if (decryptmethod) {
             levelkey = new LevelKey();
             if ((decrypturi) && (['AES-128', 'SAMPLE-AES', 'SAMPLE-AES-CENC'].indexOf(decryptmethod) >= 0)) {
@@ -257,6 +258,7 @@ export default class M3U8Parser {
               // URI to get the key
               levelkey.baseuri = baseurl;
               levelkey.reluri = decrypturi;
+              levelkey.keyformat = keyformat;
               levelkey.key = null;
               // Initialization Vector (IV)
               levelkey.iv = decryptiv;
