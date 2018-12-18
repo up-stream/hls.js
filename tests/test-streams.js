@@ -147,9 +147,18 @@ module.exports = {
   },
   {
     widevineLicenseUrl: 'https://cwip-shaka-proxy.appspot.com/no_auth',
-    emeEnabled: true
+    emeEnabled: true,
+    blacklist_ua: ['firefox', 'safari', 'internet explorer']
   }
   ),
+  tearsofsteelPlayReady: createTestStreamWithConfig({
+    url: 'http://profficialsite.origin.mediaservices.windows.net/c51358ea-9a5e-4322-8951-897d640fdfd7/tearsofsteel_4k.ism/manifest(format=m3u8-cmaf,encryption=cenc)',
+    description: 'PlayRead Test content'
+  },
+  {
+    playReadyLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)',
+    emeEnabled: true
+  }),
   audioOnlyMultipleLevels: {
     'url': 'https://s3.amazonaws.com/bob.jwplayer.com/~alex/121628/new_master.m3u8',
     'description': 'Multiple non-alternate audio levels',

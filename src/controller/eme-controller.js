@@ -68,6 +68,8 @@ const getSupportedMediaKeySystemConfigurations = function (keySystem, audioCodec
   switch (keySystem) {
   case KeySystems.WIDEVINE:
     return createWidevineMediaKeySystemConfigurations(audioCodecs, videoCodecs);
+  case KeySystems.PLAYREADY:
+    return createWidevineMediaKeySystemConfigurations(audioCodecs, videoCodecs);
   default:
     throw Error('Unknown key-system: ' + keySystem);
   }
@@ -92,6 +94,7 @@ class EMEController extends EventHandler {
     );
 
     this._widevineLicenseUrl = hls.config.widevineLicenseUrl;
+    this._playreadyLicenseUrl = hls.config.playReadyLicenseUrl;
     this._licenseXhrSetup = hls.config.licenseXhrSetup;
     this._emeEnabled = hls.config.emeEnabled;
 
@@ -116,6 +119,9 @@ class EMEController extends EventHandler {
     switch (keySystem) {
     case KeySystems.WIDEVINE:
       url = this._widevineLicenseUrl;
+      break;
+    case KeySystems.PLAYREADY:
+      url = this._playreadyLicenseUrl;
       break;
     default:
       url = null;
@@ -400,32 +406,27 @@ class EMEController extends EventHandler {
      * @param {ArrayBuffer} keyMessage
      * @returns {ArrayBuffer} Challenge data posted to license server
      */
-  _generateLicenseRequestChallenge (keysListItem, keyMessage) {
+  _generateLicenseRequestChallenge (xhr, keysListItem, keyMessage) {
     let challenge;
 
     if (keysListItem.mediaKeySystemDomain === KeySystems.PLAYREADY) {
       logger.error('PlayReady is not supported (yet)');
 
       // from https://github.com/MicrosoftEdge/Demos/blob/master/eme/scripts/demo.js
-      /*
-        if (this.licenseType !== this.LICENSE_TYPE_WIDEVINE) {
-            // For PlayReady CDMs, we need to dig the Challenge out of the XML.
-            var keyMessageXml = new DOMParser().parseFromString(String.fromCharCode.apply(null, new Uint16Array(keyMessage)), 'application/xml');
-            if (keyMessageXml.getElementsByTagName('Challenge')[0]) {
-                challenge = atob(keyMessageXml.getElementsByTagName('Challenge')[0].childNodes[0].nodeValue);
-            } else {
-                throw 'Cannot find <Challenge> in key message';
-            }
-            var headerNames = keyMessageXml.getElementsByTagName('name');
-            var headerValues = keyMessageXml.getElementsByTagName('value');
-            if (headerNames.length !== headerValues.length) {
-                throw 'Mismatched header <name>/<value> pair in key message';
-            }
-            for (var i = 0; i < headerNames.length; i++) {
-                xhr.setRequestHeader(headerNames[i].childNodes[0].nodeValue, headerValues[i].childNodes[0].nodeValue);
-            }
-        }
-        */
+      const keyMessageXml = new window.DOMParser().parseFromString(String.fromCharCode.apply(null, new Uint16Array(keyMessage)), 'application/xml');
+      if (keyMessageXml.getElementsByTagName('Challenge')[0]) {
+        challenge = window.atob(keyMessageXml.getElementsByTagName('Challenge')[0].childNodes[0].nodeValue);
+      } else {
+        logger.error('Cannot find <Challenge> in key message');
+      }
+      const headerNames = keyMessageXml.getElementsByTagName('name');
+      const headerValues = keyMessageXml.getElementsByTagName('value');
+      if (headerNames.length !== headerValues.length) {
+        logger.error('Mismatched header <name>/<value> pair in key message');
+      }
+      for (let i = 0; i < headerNames.length; i++) {
+        xhr.setRequestHeader(headerNames[i].childNodes[0].nodeValue, headerValues[i].childNodes[0].nodeValue);
+      }
     } else if (keysListItem.mediaKeySystemDomain === KeySystems.WIDEVINE) {
       // For Widevine CDMs, the challenge is the keyMessage.
       challenge = keyMessage;
@@ -455,7 +456,7 @@ class EMEController extends EventHandler {
 
     logger.log(`Sending license request to URL: ${url}`);
 
-    xhr.send(this._generateLicenseRequestChallenge(keysListItem, keyMessage));
+    xhr.send(this._generateLicenseRequestChallenge(xhr, keysListItem, keyMessage));
   }
 
   onMediaAttached (data) {
@@ -483,7 +484,8 @@ class EMEController extends EventHandler {
     const audioCodecs = data.levels.map((level) => level.audioCodec);
     const videoCodecs = data.levels.map((level) => level.videoCodec);
 
-    this._attemptKeySystemAccess(KeySystems.WIDEVINE, audioCodecs, videoCodecs);
+    //this._attemptKeySystemAccess(KeySystems.WIDEVINE, audioCodecs, videoCodecs);
+    this._attemptKeySystemAccess(KeySystems.PLAYREADY, audioCodecs, videoCodecs);
   }
 }
 
