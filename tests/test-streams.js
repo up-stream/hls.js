@@ -7,7 +7,7 @@
  * @param {string[]} [blacklist_ua]
  * @returns {{url: string, description: string, live: boolean, abr: boolean, blacklist_ua: string[]}}
  */
-function createTestStream (url, description, live = false, abr = true, blacklist_ua = []) {
+function createTestStream(url, description, live = false, abr = true, blacklist_ua = []) {
   return {
     url,
     description,
@@ -22,7 +22,7 @@ function createTestStream (url, description, live = false, abr = true, blacklist
  * @param {Object} [config]
  * @returns {{url: string, description: string, live: boolean, abr: boolean, blacklist_ua: string[]}}
  */
-function createTestStreamWithConfig (target, config) {
+function createTestStreamWithConfig(target, config) {
   if (typeof target !== 'object') {
     throw new Error('target should be object');
   }
@@ -39,10 +39,10 @@ module.exports = {
     url: 'https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8',
     description: 'Big Buck Bunny - adaptive qualities'
   },
-  {
-    // try to workaround test failing because of slow seek on Chrome/Win10
-    nudgeMaxRetry: 5
-  }
+    {
+      // try to workaround test failing because of slow seek on Chrome/Win10
+      nudgeMaxRetry: 5
+    }
   ),
   bigBuckBunny480p: {
     'url': 'https://video-dev.github.io/streams/x36xhzz/url_6/193039199_mp4_h264_aac_hq_7.m3u8',
@@ -145,20 +145,30 @@ module.exports = {
     description: 'Shaka-packager Widevine DRM (EME) HLS-fMP4 - Angel One Demo',
     blacklist_ua: ['firefox', 'safari', 'internet explorer']
   },
-  {
-    widevineLicenseUrl: 'https://cwip-shaka-proxy.appspot.com/no_auth',
-    emeEnabled: true,
-    blacklist_ua: ['firefox', 'safari', 'internet explorer']
-  }
+    {
+    //widevineLicenseUrl: 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      emeEnabled: true,
+      blacklist_ua: ['firefox', 'safari', 'internet explorer']
+    }
   ),
   tearsofsteelPlayReady: createTestStreamWithConfig({
     url: 'http://profficialsite.origin.mediaservices.windows.net/c51358ea-9a5e-4322-8951-897d640fdfd7/tearsofsteel_4k.ism/manifest(format=m3u8-cmaf,encryption=cenc)',
     description: 'PlayRead Test content'
   },
-  {
-    playReadyLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)',
-    emeEnabled: true
-  }),
+    {
+      //widevineLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)',
+    widevineLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(contentkey:6OH69TlwGwnv1QDnKVIaUQ==)',
+      
+      emeEnabled: true
+    }),
+  upstPlayReady: createTestStreamWithConfig({
+    url: 'https://drm-stream.douji.nhk.or.jp/ak_g1/3h/playlist_cenc.m3u8',
+    description: 'PlayReady demo'
+  },
+    {
+      widevineLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(contentkey:6OH69TlwGwnv1QDnKVIaUQ==)',
+      emeEnabled: true
+    }),
   audioOnlyMultipleLevels: {
     'url': 'https://s3.amazonaws.com/bob.jwplayer.com/~alex/121628/new_master.m3u8',
     'description': 'Multiple non-alternate audio levels',
