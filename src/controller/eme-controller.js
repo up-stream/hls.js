@@ -94,7 +94,6 @@ class EMEController extends EventHandler {
     );
 
     this._widevineLicenseUrl = hls.config.widevineLicenseUrl;
-    this._playreadyLicenseUrl = hls.config.playReadyLicenseUrl;
     this._licenseXhrSetup = hls.config.licenseXhrSetup;
     this._emeEnabled = hls.config.emeEnabled;
 
@@ -121,7 +120,7 @@ class EMEController extends EventHandler {
       url = this._widevineLicenseUrl;
       break;
     case KeySystems.PLAYREADY:
-      url = this._playreadyLicenseUrl;
+      url = this._widevineLicenseUrl;
       break;
     default:
       url = null;
@@ -484,7 +483,7 @@ class EMEController extends EventHandler {
     const audioCodecs = data.levels.map((level) => level.audioCodec);
     const videoCodecs = data.levels.map((level) => level.videoCodec);
 
-    //this._attemptKeySystemAccess(KeySystems.WIDEVINE, audioCodecs, videoCodecs);
+    // this._attemptKeySystemAccess(KeySystems.WIDEVINE, audioCodecs, videoCodecs);
     this._attemptKeySystemAccess(KeySystems.PLAYREADY, audioCodecs, videoCodecs);
   }
 }
