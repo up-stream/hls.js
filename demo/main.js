@@ -25,6 +25,12 @@ let enableStreaming = getDemoConfigPropOrDefault('enableStreaming', true);
 let autoRecoverError = getDemoConfigPropOrDefault('autoRecoverError', true);
 let levelCapping = getDemoConfigPropOrDefault('levelCapping', -1);
 let limitMetrics = getDemoConfigPropOrDefault('limitMetrics', -1);
+<<<<<<< HEAD
+=======
+let defaultAudioCodec = getDemoConfigPropOrDefault('defaultAudioCodec', undefined);
+let widevineLicenseUrl = getDemoConfigPropOrDefault('widevineLicenseURL', undefined);
+let playReadyLicenseUrl = getDemoConfigPropOrDefault('playReadyLicenseURL', undefined);
+>>>>>>> demoページのPlayReadyの設定を整え
 let dumpfMP4 = getDemoConfigPropOrDefault('dumpfMP4', false);
 
 let bufferingIdx = -1;
@@ -204,6 +210,12 @@ function loadSelectedStream() {
 
   // Extending both a demo-specific config and the user config which can override all
   const hlsConfig = $.extend({}, hlsjsDefaults, getEditorValue({ parse: true }));
+  if (widevineLicenseUrl) {
+    widevineLicenseUrl = unescape(widevineLicenseUrl);
+  }
+  if (playReadyLicenseUrl) {
+    playReadyLicenseUrl = unescape(playReadyLicenseUrl);
+  }
 
   if (selectedTestStream && selectedTestStream.config) {
     console.info('[loadSelectedStream] extending hls config with stream-specific config: ', selectedTestStream.config);

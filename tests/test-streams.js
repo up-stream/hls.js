@@ -146,7 +146,7 @@ module.exports = {
     blacklist_ua: ['firefox', 'safari', 'internet explorer']
   },
     {
-    //widevineLicenseUrl: 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      widevineLicenseUrl: 'https://cwip-shaka-proxy.appspot.com/no_auth',
       emeEnabled: true,
       blacklist_ua: ['firefox', 'safari', 'internet explorer']
     }
@@ -156,9 +156,7 @@ module.exports = {
     description: 'PlayRead Test content'
   },
     {
-      //widevineLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)',
-    widevineLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(contentkey:6OH69TlwGwnv1QDnKVIaUQ==)',
-      
+      playReadyLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)',
       emeEnabled: true
     }),
   upstPlayReady: createTestStreamWithConfig({
@@ -166,7 +164,7 @@ module.exports = {
     description: 'PlayReady demo'
   },
     {
-      widevineLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(contentkey:6OH69TlwGwnv1QDnKVIaUQ==)',
+      playReadyLicenseUrl: 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(contentkey:6OH69TlwGwnv1QDnKVIaUQ==)',
       emeEnabled: true
     }),
   audioOnlyMultipleLevels: {
