@@ -18,6 +18,7 @@ let levelCapping = getDemoConfigPropOrDefault('levelCapping', -1);
 let limitMetrics = getDemoConfigPropOrDefault('limitMetrics', -1);
 let defaultAudioCodec = getDemoConfigPropOrDefault('defaultAudioCodec', undefined);
 let widevineLicenseUrl = getDemoConfigPropOrDefault('widevineLicenseURL', undefined);
+let playReadyLicenseUrl = getDemoConfigPropOrDefault('playReadyLicenseURL', undefined);
 let dumpfMP4 = getDemoConfigPropOrDefault('dumpfMP4', false);
 
 let bufferingIdx = -1;
@@ -203,14 +204,18 @@ function loadSelectedStream() {
   logStatus('Loading ' + url);
 
   if (widevineLicenseUrl) {
-    widevineLicenseUrl = unescape(widevineLicenseUrl)
+    widevineLicenseUrl = unescape(widevineLicenseUrl);
+  }
+  if (playReadyLicenseUrl) {
+    playReadyLicenseUrl = unescape(playReadyLicenseUrl);
   }
 
   const hlsConfig = {
     debug            : true,
     enableWorker     : enableWorker,
     defaultAudioCodec: defaultAudioCodec,
-    widevineLicenseUrl: widevineLicenseUrl
+    widevineLicenseUrl: widevineLicenseUrl,
+    playReadyLicenseUrl: playReadyLicenseUrl
   };
 
   if (selectedTestStream && selectedTestStream.config) {
