@@ -64,6 +64,9 @@ const WebVTTParser = {
     let re = /\r\n|\n\r|\n|\r/g;
     // Uint8Array.prototype.reduce is not implemented in IE11
     let vttLines = utf8ArrayToStr(new Uint8Array(vttByteArray)).trim().replace(re, '\n').split('\n');
+    if (window.TextDecoder) {
+      vttLines = new window.TextDecoder('utf-8').decode(new Uint8Array(vttByteArray)).trim().replace(re, '\n').split('\n');
+    }
 
     let cueTime = '00:00.000';
     let mpegTs = 0;
@@ -105,7 +108,7 @@ const WebVTTParser = {
       cue.id = hash(cue.startTime.toString()) + hash(cue.endTime.toString()) + hash(cue.text);
 
       // Fix encoding of special characters. TODO: Test with all sorts of weird characters.
-      cue.text = decodeURIComponent(encodeURIComponent(cue.text));
+      // cue.text = decodeURIComponent(encodeURIComponent(cue.text));
       if (cue.endTime > 0) {
         cues.push(cue);
       }

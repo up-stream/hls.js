@@ -15,7 +15,7 @@ const StringDecoder = function StringDecoder () {
         throw new Error('Error - expected string data.');
       }
 
-      return decodeURIComponent(encodeURIComponent(data));
+      return data;
     }
   };
 };
