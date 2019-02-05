@@ -9,6 +9,7 @@ import OutputFilter from '../utils/output-filter';
 import WebVTTParser from '../utils/webvtt-parser';
 import { logger } from '../utils/logger';
 import { sendAddTrackEvent, clearCurrentCues } from '../utils/texttrack-utils';
+import { parseContent } from '../utils/vttparser';
 
 function canReuseVttTextTrack (inUseTrack, manifestTrack) {
   return inUseTrack && inUseTrack.label === manifestTrack.name && !(inUseTrack.textTrack1 || inUseTrack.textTrack2);
@@ -285,6 +286,16 @@ class TimelineController extends EventHandler {
           } catch (err) {
             const textTrackCue = new window.TextTrackCue(cue.startTime, cue.endTime, cue.text);
             textTrackCue.id = cue.id;
+            textTrackCue.align = cue.align;
+            textTrackCue.line = cue.line;
+            textTrackCue.lineAlign = cue.lineAlign;
+            textTrackCue.position = cue.position;
+            textTrackCue.positionAlign = cue.positionAlign;
+            textTrackCue.size = cue.size;
+            textTrackCue.vertical = cue.vertical;
+            textTrackCue.getCueAsHTML = function () {
+              return parseContent(window, cue.text)
+            };
             currentTrack.addCue(textTrackCue);
           }
         }
