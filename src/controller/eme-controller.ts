@@ -83,7 +83,7 @@ interface MediaKeysListItem {
  */
 class EMEController extends EventHandler {
   private _widevineLicenseUrl?: string;
-  private _playreadyLicenseUrl?: string;
+  private _playReadyLicenseUrl?: string;
   private _licenseXhrSetup?: (xhr: XMLHttpRequest, url: string) => void;
   private _emeEnabled: boolean;
   private _requestMediaKeySystemAccess: MediaKeyFunc | null
@@ -134,10 +134,10 @@ class EMEController extends EventHandler {
       }
       return this._widevineLicenseUrl;
     case KeySystems.PLAYREADY:
-      if (!this._playreadyLicenseUrl) {
+      if (!this._playReadyLicenseUrl) {
         break;
       }
-      return this._playreadyLicenseUrl;
+      return this._playReadyLicenseUrl;
     }
 
     throw new Error(`no license server URL configured for key-system "${keySystem}"`);
@@ -489,7 +489,11 @@ class EMEController extends EventHandler {
     // keep reference of media
     this._media = media;
 
-    media.addEventListener('encrypted', this._onMediaEncrypted);
+    if (HTMLVideoElement && MSMediaKeys) {
+      media.addEventListener('msneedkey', this._onMediaEncrypted);
+    } else {
+      media.addEventListener('encrypted', this._onMediaEncrypted);
+    }
   }
 
   onMediaDetached () {
