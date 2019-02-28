@@ -469,9 +469,15 @@ class EMEController extends EventHandler {
 
     // FIXME: also handle detaching media !
 
-    media.addEventListener('encrypted', (e) => {
-      this._onMediaEncrypted(e.initDataType, e.initData);
-    });
+    if (window.HTMLVideoElement && window.MSMediaKeys) {
+      media.addEventListener('msneedkey', (e) => {
+        this._onMediaEncrypted(e.initDataType, e.initData);
+      });
+    } else {
+      media.addEventListener('encrypted', (e) => {
+        this._onMediaEncrypted(e.initDataType, e.initData);
+      });
+    }
   }
 
   onManifestParsed (data) {
