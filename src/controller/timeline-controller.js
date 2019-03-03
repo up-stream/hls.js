@@ -277,11 +277,17 @@ class TimelineController extends EventHandler {
       this.prevCC = frag.cc;
     }
     let textTracks = this.textTracks,
-      hls = this.hls;
+      hls = this.hls,
+      syncPTS = this.initPTS[frag.cc];
+
+    // syncPTS of fmp 4 is * 9000
+    if (hls.streamController.demuxer.demuxerName === 'MP4Demuxer') {
+      syncPTS *= 90000;
+    }
 
     // Parse the WebVTT file contents.
-    WebVTTParser.parse(payload, this.initPTS[frag.cc], vttCCs, frag.cc, function (cues) {
-      const currentTrack = textTracks[frag.level];
+    WebVTTParser.parse(payload, syncPTS, vttCCs, frag.cc, function (cues) {
+      const currentTrack = textTracks[frag.trackId];
       // WebVTTParser.parse is an async method and if the currently selected text track mode is set to "disabled"
       // before parsing is done then don't try to access currentTrack.cues.getCueById as cues will be null
       // and trying to access getCueById method of cues will throw an exception
@@ -308,7 +314,7 @@ class TimelineController extends EventHandler {
             textTrackCue.size = cue.size;
             textTrackCue.vertical = cue.vertical;
             textTrackCue.getCueAsHTML = function () {
-              return parseContent(window, cue.text)
+              return parseContent(window, cue.text);
             };
             currentTrack.addCue(textTrackCue);
           }

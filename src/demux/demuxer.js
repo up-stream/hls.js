@@ -66,10 +66,12 @@ class Demuxer {
           global.URL.revokeObjectURL(w.objectURL);
         }
         this.demuxer = new DemuxerInline(observer, typeSupported, config, vendor);
+        this.demuxerName = this.demuxer.demuxer.constructor.name
         this.w = undefined;
       }
     } else {
       this.demuxer = new DemuxerInline(observer, typeSupported, config, vendor);
+      this.demuxerName = this.demuxer.demuxer.constructor.name
     }
   }
 
@@ -131,6 +133,8 @@ class Demuxer {
       global.URL.revokeObjectURL(this.w.objectURL);
       break;
       // special case for FRAG_PARSING_DATA: data1 and data2 are transferable objects
+    case Event.INIT_PTS_FOUND:
+      this.demuxerName = data.data.demuxerName
     case Event.FRAG_PARSING_DATA:
       data.data.data1 = new Uint8Array(data.data1);
       if (data.data2) {
