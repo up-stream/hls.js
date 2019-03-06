@@ -66,12 +66,12 @@ class Demuxer {
           global.URL.revokeObjectURL(w.objectURL);
         }
         this.demuxer = new DemuxerInline(observer, typeSupported, config, vendor);
-        this.demuxerName = this.demuxer.demuxer.constructor.name
+        this.demuxerName = this.demuxer.demuxer.name
         this.w = undefined;
       }
     } else {
       this.demuxer = new DemuxerInline(observer, typeSupported, config, vendor);
-      this.demuxerName = this.demuxer.demuxer.constructor.name
+      this.demuxerName = this.demuxer.demuxer.name
     }
   }
 
