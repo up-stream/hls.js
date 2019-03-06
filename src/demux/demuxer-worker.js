@@ -23,7 +23,7 @@ let DemuxerWorker = function (self) {
   let forwardMessage = function (ev, data) {
     switch (ev) {
       case Event.INIT_PTS_FOUND:
-        data.demuxerName = self.demuxer.demuxer.constructor.name
+        data.demuxerName = self.demuxer.demuxer.name
         break;
     }
     self.postMessage({ event: ev, data: data });

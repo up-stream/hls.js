@@ -75,10 +75,10 @@ class DemuxerInline {
       const config = this.config;
       // probing order is TS/AAC/MP3/MP4
       const muxConfig = [
-        { demux: TSDemuxer, remux: MP4Remuxer },
-        { demux: MP4Demuxer, remux: PassThroughRemuxer },
-        { demux: AACDemuxer, remux: MP4Remuxer },
-        { demux: MP3Demuxer, remux: MP4Remuxer }
+        { demux: TSDemuxer, remux: MP4Remuxer, demuxName: 'TSDemuxer' },
+        { demux: MP4Demuxer, remux: PassThroughRemuxer, demuxName: 'MP4Demuxer' },
+        { demux: AACDemuxer, remux: MP4Remuxer, demuxName: 'AACDemuxer' },
+        { demux: MP3Demuxer, remux: MP4Remuxer, demuxName: 'MP3Demuxer' }
       ];
 
       // probe for content type
@@ -88,6 +88,7 @@ class DemuxerInline {
         if (probe(data)) {
           const remuxer = this.remuxer = new mux.remux(observer, config, typeSupported, this.vendor);
           demuxer = new mux.demux(observer, remuxer, config, typeSupported);
+          demuxer.name = mux.demuxName
           this.probe = probe;
           break;
         }
