@@ -490,7 +490,7 @@ class EMEController extends EventHandler {
     this._media = media;
 
     // FIXME: also handle detaching media !
-    if (MSMediaKeys && !navigator.requestMediaKeySystemAccess) {
+    if (!/\{\s+\[native code\]/.test(MediaKeys.toString())) {
       media.addEventListener('msneedkey', this._onMediaEncrypted);
     } else {
       media.addEventListener('encrypted', this._onMediaEncrypted);
