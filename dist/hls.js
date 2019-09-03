@@ -9273,7 +9273,9 @@ function () {
 
 
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -9394,7 +9396,7 @@ function updateFragPTSDTS(details, frag, startPTS, endPTS, startDTS, endDTS) {
 function mergeDetails(oldDetails, newDetails) {
   // potentially retrieve cached initsegments
   if (newDetails.initSegments && oldDetails.initSegments) {
-    newDetails.initSegments = _objectSpread({}, newDetails.initSegments, oldDetails.initSegments);
+    newDetails.initSegments = _objectSpread({}, newDetails.initSegments, {}, oldDetails.initSegments);
   } // check if old/new playlists have fragments in common
   // loop through overlapping SN and update startPTS , cc, and duration if any found
 
@@ -18715,7 +18717,7 @@ function (_EventHandler) {
 
 
     webvtt_parser.parse(payload, syncPTS, vttCCs, frag.cc, function (cues) {
-      var currentTrack = textTracks[frag.trackId]; // WebVTTParser.parse is an async method and if the currently selected text track mode is set to "disabled"
+      var currentTrack = textTracks[frag.level]; // WebVTTParser.parse is an async method and if the currently selected text track mode is set to "disabled"
       // before parsing is done then don't try to access currentTrack.cues.getCueById as cues will be null
       // and trying to access getCueById method of cues will throw an exception
 
@@ -19984,7 +19986,9 @@ function (_EventHandler) {
 
 /* harmony default export */ var eme_controller = (eme_controller_EMEController);
 // CONCATENATED MODULE: ./src/config.ts
-function config_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { config_defineProperty(target, key, source[key]); }); } return target; }
+function config_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function config_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { config_ownKeys(source, true).forEach(function (key) { config_defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { config_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function config_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -20007,6 +20011,7 @@ function config_defineProperty(obj, key, value) { if (key in obj) { Object.defin
 
 // If possible, keep hlsDefaultConfig shallow
 // It is cloned whenever a new Hls instance is created, by keeping the config
+// shallow the properties are cloned, and we don't end up manipulating the default
 var hlsDefaultConfig = config_objectSpread({
   autoStartLoad: true,
   // used by stream-controller
@@ -20169,7 +20174,9 @@ function timelineConfig() {
 }
 // CONCATENATED MODULE: ./src/hls.ts
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return hls_Hls; });
-function hls_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { hls_defineProperty(target, key, source[key]); }); } return target; }
+function hls_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function hls_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { hls_ownKeys(source, true).forEach(function (key) { hls_defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { hls_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function hls_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -20306,7 +20313,7 @@ function (_Observer) {
     } // Shallow clone
 
 
-    _this.config = hls_objectSpread({}, defaultConfig, userConfig);
+    _this.config = hls_objectSpread({}, defaultConfig, {}, userConfig);
 
     var _assertThisInitialize = hls_assertThisInitialized(_this),
         config = _assertThisInitialize.config;

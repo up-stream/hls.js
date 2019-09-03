@@ -344,15 +344,6 @@ function loadSelectedStream() {
   }
 
   onDemoConfigChanged();
-  hlsConfig.widevineLicenseUrl = 'https://drm-license.douji.nhk.or.jp/widevine/getLicense';
-  hlsConfig.playReadyLicenseUrl = 'https://drm-license.douji.nhk.or.jp/playready/getLicense';
-  hlsConfig.emeEnabled = true;
-
-  hlsConfig.licenseXhrSetup = function (xhr, url) {
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Authorization', 'Bearer debug-token');
-  };
-
   console.log('Using Hls.js config:', hlsConfig);
   window.hls = hls = new Hls(hlsConfig);
   logStatus('Loading manifest and attaching video element...');
