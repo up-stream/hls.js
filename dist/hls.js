@@ -9021,7 +9021,7 @@ var demuxer_inline = __webpack_require__("./src/demux/demuxer-inline.js");
  * MediaSource helper
  */
 function getMediaSource() {
-  return MediaSource || window.WebKitMediaSource;
+  return window.MediaSource || window.WebKitMediaSource;
 }
 // EXTERNAL MODULE: ./src/utils/get-self-scope.js
 var get_self_scope = __webpack_require__("./src/utils/get-self-scope.js");
