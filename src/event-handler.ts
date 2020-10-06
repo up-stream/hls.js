@@ -79,6 +79,7 @@ class EventHandler {
       return this[funcName].bind(this, data);
     };
     try {
+      logger.debug(`Calling Generic Event: ${event} in ${this.constructor.name}`)
       eventToFunction.call(this, event, data).call();
     } catch (err) {
       logger.error(`An internal error happened while handling event ${event}. Error message: "${err.message}". Here is a stacktrace:`, err);
