@@ -67,11 +67,11 @@ class TSDemuxer {
 
   static _syncOffset (data) {
     // scan 1000 first bytes
-    const scanwindow = Math.min(1000, data.length - 3 * 188);
+    const scanwindow = Math.min(1000, data.length - 2 * 188 +1);
     let i = 0;
     while (i < scanwindow) {
       // a TS fragment should contain at least 3 TS packets, a PAT, a PMT, and one PID, each starting with 0x47
-      if (data[i] === 0x47 && data[i + 188] === 0x47 && data[i + 2 * 188] === 0x47) {
+      if (data[i] === 0x47 && data[i + 188] === 0x47) {
         return i;
       } else {
         i++;
